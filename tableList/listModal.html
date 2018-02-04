@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="../bootstrap.css">
+
+    <script src="../js/vue.js"></script>
+</head>
+<body>
+    <div id="tableList">
+        <div class="form-group">
+            <button class="btn btn-success btn-sm" @click="add">新建</button>
+        </div>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>年龄</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item,index) in items">
+                    <td>{{item.name}}</td>
+                    <td>{{item.sex == '1' ? "男" : "女"}}</td>
+                    <td>{{item.age}}</td>
+                    <td><button @click="edit(index)" class="btn btn-success btn-xs">编辑</button><button v-on:click="del(index)" class="btn btn-danger btn-xs">删除</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+    <model :list='selectedlist' :isactive="isActive" v-cloak @change="changeModal" @modify="modify"></model>
+
+    <script>
+        Vue.component('model', {
+            props: ['list', 'isactive'],
+            template: `<div v-show="isactive">
+                        <div class="black"></div>
+                        <div class="modal" style="display: block;">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" @click="cancel()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        <h4 class="modal-title">编辑</h4>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <form class="form-horizontal tableForm" role="form" >
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label titleLang">名字 :</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control input-sm" v-model="saveData.name">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">性别 :</label>
+                                                <div class="col-sm-2">
+                                                    <input type="radio"  value="1" v-model="saveData.sex">男
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <input type="radio"  value="2" v-model="saveData.sex">女
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">年龄 :</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" class="form-control input-sm" v-model="saveData.age">
+                                                </div>
+                                            </div>
+                                        </form>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-default" data-dismiss="modal" @click="cancel()">取消</button>
+                                        <button type="button" class="btn btn-primary"  @click="save()">确定</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>`,
+
+            computed: {
+                saveData() {
+                    return this.list;
+                }
+            },
+
+            methods: {
+                cancel() {
+                    this.$emit('change');
+                },
+                save() {
+                    this.$emit('modify', this.saveData);
+                }
+            }
+        })
+
+
+        var tableList = new Vue({
+                el : '#tableList',
+                data : {
+                    isactive:true,
+                    isActive : true,
+                    selectedlist: {},
+                    name : '',
+                    sex : '1',
+                    age : "",
+                    tag : "",
+                    items : [{
+                        "id" : 1,
+                        "name" : "小明",
+                        "sex" : 1,
+                        "age"  : 12
+                        },{
+                            "id" : 2,
+                            "name" : "小花",
+                            "sex" : 2,
+                            "age" : 10
+                        }]
+                },
+            created() {
+                console.log(Date.now());
+                this.setSlist(this.list);
+            },
+                methods : {
+                    add: function () {
+                        this.saveData = {
+                            name: '',
+                            sex: '1',
+                            age : ""
+                        };
+                        this.isActive = true;
+                    },
+                    del : function (index) {
+                        this.items.splice(index,1);
+                    },
+
+                    edit : function (index) {
+                        this.tag = index;
+                        console.log(this.items[index])
+                        this.saveModal = !this.saveModal;
+                    },
+                    changeModal : function () {
+                        this.isActive = !this.isActive;
+                    },
+                    modify(arr) {
+                        if (this.selected > -1) {
+                            Vue.set(this.list, this.selected, arr);
+                        } else {
+                            this.list.push(arr);
+                        }
+                        this.setSlist(this.list);
+                        this.changeModal();
+                    },
+                }
+        })
+
+    </script>
+</body>
+</html>
